@@ -1,4 +1,3 @@
-// Seleção de elementos
 const statusEl = document.getElementById("status");
 const clockEl = document.getElementById("clock");
 const btn = document.getElementById("btn");
@@ -7,7 +6,6 @@ const cityEl = document.getElementById("city");
 const btnCity = document.getElementById("btnCity");
 const cityOut = document.getElementById("cityOut");
 
-// 1. Função do Relógio
 function tick() {
     const now = new Date();
     clockEl.textContent = now.toLocaleTimeString("pt-BR");
@@ -15,15 +13,13 @@ function tick() {
 setInterval(tick, 1000);
 tick();
 
-// Status Inicial
-statusEl.textContent = "Site carregado com sucesso. (Sem Node, sem instalação.)";
+statusEl.textContent = "Site carregado com sucesso. (Sem Node, sem instalacao.)";
 
-// 2. Teste de API Pública (Agify)
 btn.addEventListener("click", async () => {
     apiEl.textContent = "Consultando API...";
     try {
         const resp = await fetch("https://api.agify.io?name=rafael");
-        if (!resp.ok) throw new Error("Erro na requisição: " + resp.status);
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
         const data = await resp.json();
         apiEl.textContent = JSON.stringify(data, null, 2);
     } catch (err) {
@@ -31,7 +27,6 @@ btn.addEventListener("click", async () => {
     }
 });
 
-// 3. Funções auxiliares para o Clima
 function showCity(obj) {
     cityOut.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
 }
@@ -55,30 +50,25 @@ async function fetchWeather(lat, lon) {
     return await resp.json();
 }
 
-// 4. Evento do botão de Clima
 btnCity.addEventListener("click", async function() {
     const city = (cityEl.value || "").trim();
     if (!city) return showCity("Digite uma cidade.");
-    
-    showCity("Buscando informações...");
+    showCity("Buscando...");
     try {
         localStorage.setItem("lastCity", city);
-
         const geo = await geocodeCity(city);
         const meteo = await fetchWeather(geo.lat, geo.lon);
-
         showCity({
             cidade: geo.name,
             pais: geo.country,
-            temperatura: meteo.current?.temperature_2m + "°C",
-            vento: meteo.current?.wind_speed_10m + " km/h",
-            timestamp: meteo.current?.time
+            temperatura: meteo.current?.temperature_2m,
+            vento: meteo.current?.wind_speed_10m,
+            unidades: meteo.current_units
         });
     } catch (err) {
         showCity("Erro: " + err.message);
     }
 });
 
-// Preencher automaticamente ao abrir se houver histórico
 const last = localStorage.getItem("lastCity");
 if (last) cityEl.value = last;
